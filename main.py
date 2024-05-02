@@ -6,7 +6,7 @@ detector = HandDetector(maxHands=2,detectionCon=0.8)
 
 while True:
     success, img = cap.read()
-    hands,img = detector.findHands(img)
+    hands,img = detector.findHands(img,flipType=False)
 
     cv2.imshow("Image",img)
     cv2.waitKey(1)
