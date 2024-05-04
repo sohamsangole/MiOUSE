@@ -1,13 +1,16 @@
 import cv2
 from cvzone.HandTrackingModule import HandDetector
 import time
-# import autopy
+import autopy
+import numpy as np
 
-wcam, hcam = 640,480
-
+wCam, hCam = 640,480
+frameR = 100
+wScr, hScr = autopy.screen.size()
+print(wScr,hScr)
 cap = cv2.VideoCapture(0)
-cap.set(3,wcam)
-cap.set(4,hcam)
+cap.set(3,wCam)
+cap.set(4,hCam)
 pTime = 0
 detector = HandDetector(maxHands=2,detectionCon=0.8)
 x1,x2,x3,x4 = -1,-1,-1,-1
@@ -39,9 +42,16 @@ while True:
             fingersR = detector.fingersUp(hands[1])
         # print(f'x1 : {x1} y1 : {y1} x2 : {x2} y2 : {y2} x3 : {x3} y3 : {y3} x4 : {x4} y4 : {y4}')
         
-        
         print(fingersL,fingersR)
-    
+        # print(fingersL,fingersR)
+        if fingersR == [0,1,1,1,1] or fingersR == [0,1,1,1,0] : 
+            cv2.rectangle(img,(frameR,frameR),(wCam-frameR,hCam-frameR),(255,0,255),2)
+            if fingersL == [1,1,0,0,0] :
+                mouseX = np.interp(x1,(frameR,wCam-frameR),(0,wScr))
+                mouseY = np.interp(y1,(frameR,hCam-frameR),(0,hScr))
+                autopy.mouse.move(wScr - mouseX,mouseY)
+
+                # print("Mouse Moving")
     # Frame Rate
     # cTime = time.time()
     # fps = 1 / (cTime - pTime)
