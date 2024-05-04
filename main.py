@@ -42,14 +42,28 @@ while True:
             fingersR = detector.fingersUp(hands[1])
         # print(f'x1 : {x1} y1 : {y1} x2 : {x2} y2 : {y2} x3 : {x3} y3 : {y3} x4 : {x4} y4 : {y4}')
         
-        print(fingersL,fingersR)
+        # print(fingersL,fingersR)
         # print(fingersL,fingersR)
         if fingersR == [0,1,1,1,1] or fingersR == [0,1,1,1,0] : 
-            cv2.rectangle(img,(frameR,frameR),(wCam-frameR,hCam-frameR),(255,0,255),2)
+            # Calculate the position of the rectangle based on the right hand
+            # Calculate the position of the rectangle based on the right hand
+            rect_x1 = 0
+            rect_y1 = int(y3) - frameR
+            rect_x2 = int(x4) - frameR
+            rect_y2 = int(y4) + frameR
+            cv2.rectangle(img,(rect_x1,rect_y1),(rect_x2,rect_y2),(255,0,255),2)
             if fingersL == [1,1,0,0,0] :
-                mouseX = np.interp(x1,(frameR,wCam-frameR),(0,wScr))
-                mouseY = np.interp(y1,(frameR,hCam-frameR),(0,hScr))
-                autopy.mouse.move(wScr - mouseX,mouseY)
+                rel_x = np.interp(x1, (rect_x1, rect_x2), (0, 1))
+                rel_y = np.interp(y1, (rect_y1, rect_y2), (0, 1))
+
+                # Map the relative position to the screen size
+                mouseX = np.interp(x1, (rect_x1, rect_x2), (wScr,0))
+                mouseY = np.interp(y1, (rect_y1, rect_y2), (0,hScr))
+                
+                # Move the mouse accordingly
+                if rect_x1 < x1 < rect_x2 and rect_y1 < y1 < rect_y2:
+                    # Move the mouse accordingly
+                    autopy.mouse.move(mouseX, mouseY)
 
                 # print("Mouse Moving")
     # Frame Rate
