@@ -8,6 +8,7 @@ wCam, hCam = 640,480
 frameR = 100
 wScr, hScr = autopy.screen.size()
 print(wScr,hScr)
+mouse_buffer = [(wScr // 2, hScr // 2)] * 5
 cap = cv2.VideoCapture(0)
 cap.set(3,wCam)
 cap.set(4,hCam)
@@ -60,10 +61,14 @@ while True:
                 mouseX = np.interp(x1, (rect_x1, rect_x2), (wScr,0))
                 mouseY = np.interp(y1, (rect_y1, rect_y2), (0,hScr))
                 
+                mouse_buffer.pop(0)  # Remove oldest position
+                mouse_buffer.append((mouseX, mouseY))  # Add current position to buffer
+                smoothMouseX, smoothMouseY = np.mean(mouse_buffer, axis=0)  
+                
                 # Move the mouse accordingly
                 if rect_x1 < x1 < rect_x2 and rect_y1 < y1 < rect_y2:
                     # Move the mouse accordingly
-                    autopy.mouse.move(mouseX, mouseY)
+                    autopy.mouse.move(smoothMouseX, smoothMouseY)
 
                 # print("Mouse Moving")
     # Frame Rate
