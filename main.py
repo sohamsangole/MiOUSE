@@ -4,7 +4,7 @@ import time
 import autopy
 import numpy as np
 
-wCam, hCam = 640,480
+wCam, hCam = 720,405
 frameR = 100
 wScr, hScr = autopy.screen.size()
 print(wScr,hScr)
@@ -22,6 +22,8 @@ prev_click_state = False  # Track the previous state of click gesture
 click_threshold = 30
 lCentre_X = -1
 lCentre_Y = -1
+prev_x, prev_y = -1, -1
+
 
 while True:
     success, img = cap.read()
@@ -61,17 +63,22 @@ while True:
             rect_y2 = int(y4) + frameR
             cv2.rectangle(img,(rect_x1,rect_y1),(rect_x2,rect_y2),(255,0,255),2)
             if fingersL == [0,1,1,1,1] :
+                centroid = np.mean(np.array(hands[0]["lmList"][1:]), axis=0, dtype=np.int)
+                # m1 = x1
+                # m2 = y1
+                m1 = centroid[0]
+                m2 = centroid[1]
                 print(lCentre_X,lCentre_Y)
                 # Map the relative position to the screen size
-                mouseX = np.interp(lCentre_X, (rect_x1, rect_x2), (wScr,0))
-                mouseY = np.interp(lCentre_Y, (rect_y1, rect_y2), (0,hScr))
+                mouseX = np.interp(m1, (rect_x1, rect_x2), (wScr,0))
+                mouseY = np.interp(m2, (rect_y1, rect_y2), (0,hScr))
                 
                 mouse_buffer.pop(0)  # Remove oldest position
                 mouse_buffer.append((mouseX, mouseY))  # Add current position to buffer
                 smoothMouseX, smoothMouseY = np.mean(mouse_buffer, axis=0)  
                 
                 # Move the mouse accordingly
-                if rect_x1 < lCentre_X < rect_x2 and rect_y1 < lCentre_Y < rect_y2:
+                if rect_x1 < m1 < rect_x2 and rect_y1 < m2 < rect_y2:
                     # Move the mouse accordingly
                     autopy.mouse.move(smoothMouseX, smoothMouseY)
                 # print("Mouse Moving")
@@ -83,9 +90,20 @@ while True:
                 if length < click_threshold:  # If distance is less than threshold, it's a click gesture
                     if not prev_click_state:  # If previous state was not clicking, simulate a click
                         autopy.mouse.click()  # Perform left-click action
-                        prev_click_state = True  # Update previous click state
+                        prev_click_state = True 
+                    # Select text if hand is moved after clicking
+                    if prev_x != -1 and prev_y != -1:
+                        if prev_click_state or (prev_x != m1 or prev_y != m2):
+                            autopy.mouse.toggle(autopy.mouse.Button.LEFT, down=True)
+                        else :
+                            autopy.mouse.toggle(autopy.mouse.Button.LEFT, down=False)
+                    # Update previous hand position
+                    prev_x, prev_y = m1, m2
                 else:
-                    prev_click_state = False  # Update previous click state if not clicking
+                    prev_click_state = False  
+                    autopy.mouse.toggle(autopy.mouse.Button.LEFT, down=False)# Update previous click state if not clicking
+                    prev_x = -1
+                    prev_y = -1
 
     # Frame Rate
     # cTime = time.time()
