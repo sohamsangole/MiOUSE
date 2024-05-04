@@ -42,12 +42,7 @@ while True:
             fingersL = detector.fingersUp(hands[0])
             fingersR = detector.fingersUp(hands[1])
         # print(f'x1 : {x1} y1 : {y1} x2 : {x2} y2 : {y2} x3 : {x3} y3 : {y3} x4 : {x4} y4 : {y4}')
-        
-        # print(fingersL,fingersR)
-        # print(fingersL,fingersR)
         if fingersR == [0,1,1,1,1] or fingersR == [0,1,1,1,0] : 
-            # Calculate the position of the rectangle based on the right hand
-            # Calculate the position of the rectangle based on the right hand
             rect_x1 = 0
             rect_y1 = int(y3) - frameR
             rect_x2 = int(x4) - frameR
